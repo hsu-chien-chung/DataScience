@@ -1,5 +1,5 @@
-# 資料科學專案 #
-# 加拿大溫莎市的房屋價格分析與預測 #
+# 資料科學專案
+# 加拿大溫莎市的房屋價格分析與預測
 
 ## 資料來源： ##
 ## House Prices in the City of Windsor, Canada ##
