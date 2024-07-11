@@ -1,14 +1,14 @@
 # 資料科學專案
 # 加拿大溫莎市的房屋價格分析與預測
 
-## 資料來源： ##
-## House Prices in the City of Windsor, Canada ##
-### 從R語言內建的加拿大溫莎市的房屋資料來做分析，資料為1987 年 7 月、8 月和 9 月期間加拿大溫莎市房屋的銷售價格。(資料共546筆，沒有遺失值) ###
+## 資料來源：
+## House Prices in the City of Windsor, Canada
+### 從R語言內建的加拿大溫莎市的房屋資料來做分析，資料為1987 年 7 月、8 月和 9 月期間加拿大溫莎市房屋的銷售價格。(資料共546筆，沒有遺失值)
 
-## 目標(依變數) ##
+## 目標(依變數)
 *   價格(price)
 
-## 自變數(11)： ##
+## 自變數(11)：
 
 *   坪數(lotsize)以平方英尺為單位
 *   臥室數(bedrooms)
@@ -29,10 +29,13 @@ df = pd.read_csv('/content/HousePrices.csv',index_col=0)
 df.head()
 ```
 ![image](https://github.com/hsu-chien-chung/DataScienceProject/assets/118785456/b94ad0c6-8f14-4cd1-b116-e45764e8b557)
-### 資料正規畫 ###
+
+### 資料正規化
+
 資料本身的數據數值沒有統一，所以選擇將資料作正規化。
 
 使用了最小最大標準化來將除了yes/no以外的資料來正規化，yes/no我選擇用Label encoding來數值化，這樣全部的數值只會介於0~1之間。
+
 ```python
 #將資料做標準化
 from sklearn import preprocessing
@@ -49,9 +52,13 @@ df.replace('no', 0,inplace=True)
 
 df
 ```
+
 ![image](https://github.com/hsu-chien-chung/DataScienceProject/assets/118785456/a0c97322-2514-4797-9021-e9086ef6dc76)
-### 資料分析： ###
-顯示目標與變數之間的趨勢與關係
+
+### 資料分析：
+
+#### 顯示目標與變數之間的趨勢與關係
+
 ```python
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -61,7 +68,9 @@ sns.pairplot(df,kind="reg",plot_kws={'line_kws':{'color':'r'},'scatter_kws':{'co
 plt.show()
 #由於正規化後，很多數值都是0或1比較難看出趨勢。
 ```
-相關性矩陣與矩陣圖
+
+#### 相關性矩陣與矩陣圖
+
 ```python
 df.corr().style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}")
 #相關性矩陣，從表可得知所有變數的相關性都落在中度相關與弱相關，裡面的數值沒有0.7以上的強相關。
@@ -72,9 +81,11 @@ sns.set(rc={'figure.figsize':(10,8)})
 sns.heatmap(df.corr())
 #做相關性矩陣圖，從圖可以看到顏色越淺表示相關性越強。
 ```
-從相關性矩陣圖可得知，目標與變數之間沒有較強的相關性。
 
-基礎的資料與箱型圖
+從相關性矩陣圖可得知，目標與變數之間沒有較強的相關性。  
+
+#### 基礎的資料與箱型圖
+
 ```python
 print(df.iloc[:,0].describe()) #顯示價格的基礎資料
 sns.set(rc={'figure.figsize':(10,5)})
@@ -92,8 +103,11 @@ print('\nIQR=',IQR,'下邊界=',Lower,'上邊界=',Upper)
 sns.histplot(data=df,x='price')
 #購買房屋價格如同人民薪資所得一樣是右偏斜。
 ```
-### 主成分分析 ###
+
+### 主成分分析
+
 變數量多，所以用資料降維來方便分析。
+
 ```python
 from sklearn.decomposition import PCA
 X = df.iloc[:,1:]
@@ -109,11 +123,10 @@ df_pc.style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}")
 #第2主成分在變數中央空調、地下室、樓層數的特徵解釋占比大，除了地下室其他都是正相關性為主。
 #第3主成分在在市區、車道、中央空調、地下室的特徵解釋占比大，車道和在市區是負相關性、其他都是正相關性。
 ```
+
 第1主成分在經由特徵去收尋加拿大的房屋性質，我判斷是接近市區的獨立屋。  
 第2主成分為鎮屋，房屋都是連在一起的，像是歐美影片裡常出現的房子。  
 第3主成分可能是鄉間的小別墅。  
-
-
 
 ```python
 pca = PCA(3)
@@ -134,11 +147,11 @@ np.round(pca_10d.explained_variance_ratio_, 2)
 從上得知主成分分析的結果是不佳的，畢竟如果選擇前三項主成分來分析，會有接近40%的變數解釋力損失，取到90%以上，就喪失了用主成分降維的意義。  
 (備註：變數轉換公式:原始資料*(pca解釋變量(X))，就會有新的變數。)
 
-### 集群分析 ###
+### 集群分析
 
-K-Means來分群。
+#### K-Means分群
 
-``python
+```python
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score  #這是測試KMeans要分幾群最理想的套件
 
@@ -149,7 +162,7 @@ inertias = [model.inertia_ for model in kmeans_list]
 silhouette_scores = [silhouette_score(X, model.labels_) for model in kmeans_list[1:]]
 ```
 
-選擇最佳的分群數，
+#### 選擇最佳的分群數，
 
 ```python
 # 方法一:
@@ -163,7 +176,7 @@ sns.lineplot(x=range(2,12),y=silhouette_scores) #分數越高的點表示最適�
 
 由於上方數據得知這組資料不適合k-means來分群。  
 
-嘗試實作分兩群
+#### 嘗試實作分兩群
 
 ```python
 import copy
@@ -178,7 +191,7 @@ df1['Kmeans']=Kmeans.labels_  #將分好的值都入d值都入df1
 df1
 ```
 
-使用相關性矩陣圖來判斷變數與分群的相關性。
+使用相關性矩陣圖來判斷變數與分群的相關性
 
 ```python
 sns.heatmap(df1.corr()) #從中能發現有一個變數(地下室)是強相關
@@ -192,10 +205,10 @@ df1.corr().style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}")
 
 從之前的PCA和KMean得知這筆資料可能不適合用來分群，接下來我打算用神經網路(NN)來訓練並預測。
 
-### 神經網路(NN) ###
+### 神經網路(NN)
 
 ```python
-#先載入需要的套件
+#載入所需套件
 import keras
 from pandas.core.frame import to_arrays
 from keras.models import Sequential
@@ -244,7 +257,7 @@ df.iloc[:,0]=df.iloc[:,0].astype('str')  #我先將資料類型轉成文字以�
 df.price.value_counts()   #能看到資料已經分類好了
 ```
 
-資料會分割成60%訓練集、20%測試集、20%驗證集。
+資料分割:60%訓練集、20%測試集、20%驗證集。
 
 ```python
 #透過套件將資料分割
@@ -266,7 +279,7 @@ print(train_y.shape)
 print(test_y.shape)
 ```
 
-使用One-hot encoding 編碼。
+使用One-hot encoding 編碼
 
 ```python
 # 文字類別轉換成0與1編成的個碼
@@ -283,14 +296,12 @@ model.add(Dropout(0.1, input_dim=11))        #使用Dropout來避免過度擬合
 model.add(Dense(11,activation='relu'))         #使用非線性函數
 model.add(Dense(3,activation='softmax'))        #要分三群，所以輸出為3
 
-
-
 adam = Adam(lr=0.001)      #使用Adam梯度下降，學習率為0.001
 model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])  #損失函數是分類交叉商
 model.summary()
 ```
 
-訓練模型
+#### 訓練模型
 
 ```python
 history = model.fit(train_X, train_y, validation_split=0.25, batch_size=4, epochs=500)
