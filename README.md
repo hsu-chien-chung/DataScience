@@ -50,7 +50,7 @@ df.replace('no', 0,inplace=True)
 df
 ```
 ![image](https://github.com/hsu-chien-chung/DataScienceProject/assets/118785456/a0c97322-2514-4797-9021-e9086ef6dc76)
-### 資料分析：###
+### 資料分析： ###
 顯示目標與變數之間的趨勢與關係
 ```python
 import matplotlib.pyplot as plt
