@@ -111,62 +111,202 @@ df_pc.style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}")
 ```
 第1主成分在經由特徵去收尋加拿大的房屋性質，我判斷是接近市區的獨立屋。  
 第2主成分為鎮屋，房屋都是連在一起的，像是歐美影片裡常出現的房子。  
-第3主成分可能是鄉間的小別墅。
+第3主成分可能是鄉間的小別墅。  
 
 
 
+```python
+pca = PCA(3)
+pca.fit(X)
+np.round(pca.explained_variance_ratio_, 2)
+print(pca.explained_variance_,"\n") #解釋變量
+print(pca.explained_variance_ratio_) #3維的解釋變量的比例
+```
+
+由於前三項解釋能力只有60%多，所以我想看所有的主成分解釋力。
+
+```python
+pca_10d = PCA(11)
+pca_10d.fit(X)
+np.round(pca_10d.explained_variance_ratio_, 2)
+```
+
+從上得知主成分分析的結果是不佳的，畢竟如果選擇前三項主成分來分析，會有接近40%的變數解釋力損失，取到90%以上，就喪失了用主成分降維的意義。  
+(備註：變數轉換公式:原始資料*(pca解釋變量(X))，就會有新的變數。)
+
+### 集群分析 ###
+
+K-Means來分群。
+
+``python
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score  #這是測試KMeans要分幾群最理想的套件
+
+X = df.iloc[:,1:]
+
+kmeans_list = [KMeans(n_clusters=k, random_state=46).fit(X) for k in range(1, 12)]
+inertias = [model.inertia_ for model in kmeans_list]
+silhouette_scores = [silhouette_score(X, model.labels_) for model in kmeans_list[1:]]
+```
+
+選擇最佳的分群數，
+
+```python
+# 方法一:
+sns.lineplot(x=range(1,12),y=inertias)  #線轉為平緩的點代表最適的分群，可是此圖的點落在分11群。
+```
+
+```python
+# 方法二:
+sns.lineplot(x=range(2,12),y=silhouette_scores) #分數越高的點表示最適的分群，而此圖也落在分9或11群
+```
+
+由於上方數據得知這組資料不適合k-means來分群。  
+
+嘗試實作分兩群
+
+```python
+import copy
+Kmeans = KMeans(n_clusters=2)
+
+X = df.iloc[:,1:]
+Kmeans.fit(X)
+
+df1 = df.copy()    #複製一個新的data
+
+df1['Kmeans']=Kmeans.labels_  #將分好的值都入d值都入df1
+df1
+```
+
+使用相關性矩陣圖來判斷變數與分群的相關性。
+
+```python
+sns.heatmap(df1.corr()) #從中能發現有一個變數(地下室)是強相關
+```
+
+```python
+df1.corr().style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}") 
+
+#相關性矩陣的地下室數值與Kmeans分類是完全一樣的，能判斷他是用有無地下室來分類。
+```
+
+從之前的PCA和KMean得知這筆資料可能不適合用來分群，接下來我打算用神經網路(NN)來訓練並預測。
+
+### 神經網路(NN) ###
+
+```python
+#先載入需要的套件
+import keras
+from pandas.core.frame import to_arrays
+from keras.models import Sequential
+from keras.layers.core import Dense, Dropout, Activation
+from keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+```
+
+```python
+# 畫圖函式
+def PLT(history):
+  
+  # "Accuracy/Val_accuracy"
+  plt.plot(history.history['accuracy'])
+  plt.plot(history.history['val_accuracy'])
+  plt.title('model accuracy')
+  plt.ylabel('accuracy')
+  plt.xlabel('epoch')
+  plt.legend(['train', 'validation'], loc='upper left')
+  plt.show()
+
+  # "Loss/Val_loss"
+  plt.plot(history.history['loss'])
+  plt.plot(history.history['val_loss'])
+  plt.title('model loss')
+  plt.ylabel('loss')
+  plt.xlabel('epoch')
+  plt.legend(['train', 'validation'], loc='upper left')
+  plt.show()
+```
+
+將價格強制分成3類，分別為前25%,中段的50%和後段的25%。
+
+```python
+sns.set(rc={'figure.figsize':(10,5)})
+sns.boxplot(data=df,x='price')
+print(df.iloc[:,0].describe())
+```
+
+```python
+df.iloc[df.iloc[:,0]>0.345,0]=3
+df.iloc[df.iloc[:,0]<0.14575,0]=1
+df.iloc[df.iloc[:,0]<1,0]=2
+
+df.iloc[:,0]=df.iloc[:,0].astype('str')  #我先將資料類型轉成文字以方便之後的機器人計算
+df.price.value_counts()   #能看到資料已經分類好了
+```
+
+資料會分割成60%訓練集、20%測試集、20%驗證集。
+
+```python
+#透過套件將資料分割
+train_df,test_df=train_test_split(df,train_size=0.8) #先分出20%測試集，之後會再分出20%驗證集
+
+train_df = np.array(train_df)
+test_df = np.array(test_df)
+
+train_X = train_df[:,1:].astype(float)  #將X資料轉換成統一的類別
+test_X = test_df[:,1:].astype(float)
+
+print(train_X.shape)   #確認每個維度的個數
+print(test_X.shape)
+
+train_y = train_df[:,0]
+test_y = test_df[:,0]
+
+print(train_y.shape)  
+print(test_y.shape)
+```
+
+使用One-hot encoding 編碼。
+
+```python
+# 文字類別轉換成0與1編成的個碼
+# 0ne-hot encoding
+train_y = pd.get_dummies(train_y).to_numpy()  #將dataframe轉換成array,以方便機器人運算
+test_y = pd.get_dummies(test_y).to_numpy()
+```
+
+```python
+#設定模型
+from keras.backend import dropout
+model = Sequential()
+model.add(Dropout(0.1, input_dim=11))        #使用Dropout來避免過度擬合，設定0.1表示有10%的神經元會被隨機丟棄 
+model.add(Dense(11,activation='relu'))         #使用非線性函數
+model.add(Dense(3,activation='softmax'))        #要分三群，所以輸出為3
 
 
 
+adam = Adam(lr=0.001)      #使用Adam梯度下降，學習率為0.001
+model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])  #損失函數是分類交叉商
+model.summary()
+```
 
+訓練模型
 
+```python
+history = model.fit(train_X, train_y, validation_split=0.25, batch_size=4, epochs=500)
 
+#validation_split=0.25是指將train_X的資料集中的0.25做為驗證集 0.8*0.25=0.2 ,就能達成60%訓練、20%測試、20%驗證
+```
 
+訓練過程的成功率與損失值的圖表(含驗證集)。
 
+```python
+PLT(history) #圖片結果顯示橘線的最後的準確率有向下的趨勢，損失值的中後段有向上趨勢，代表還是有過度擬合的發生。
+```
 
+模型的測試分數。
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```python
+test_loss, test_acc = model.evaluate(test_X, test_y)
+print('\nTest accuracy:', test_acc)  #準確率來到72.73%，還可以
+```
