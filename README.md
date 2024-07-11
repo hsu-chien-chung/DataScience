@@ -1,9 +1,8 @@
-# 資料科學專案  
-加拿大溫莎市的房屋價格分析與預測
+# 資料科學專案:加拿大溫莎市的房屋價格分析與預測
 
-## 資料來源：
-## House Prices in the City of Windsor, Canada
+## 資料來源：House Prices in the City of Windsor, Canada
 ### 從R語言內建的加拿大溫莎市的房屋資料來做分析，資料為1987 年 7 月、8 月和 9 月期間加拿大溫莎市房屋的銷售價格。(資料共546筆，沒有遺失值)
+__[資料內容相關連結](https://vincentarelbundock.github.io/Rdatasets/doc/AER/HousePrices.html)__
 
 ## 目標(依變數)
 *   價格(price)
@@ -21,7 +20,9 @@
 *   有無中央空調(aircon)
 *   車庫數(garage)
 *   位於市區(prefer)
-## [資料內容相關連結](https://vincentarelbundock.github.io/Rdatasets/doc/AER/HousePrices.html)
+
+### 資料載入
+
 ```python
 import pandas as pd
 import numpy as np
@@ -191,7 +192,7 @@ df1['Kmeans']=Kmeans.labels_  #將分好的值都入d值都入df1
 df1
 ```
 
-使用相關性矩陣圖來判斷變數與分群的相關性
+使用相關性矩陣圖來判斷變數與分群的相關性。
 
 ```python
 sns.heatmap(df1.corr()) #從中能發現有一個變數(地下室)是強相關
@@ -279,7 +280,7 @@ print(train_y.shape)
 print(test_y.shape)
 ```
 
-使用One-hot encoding 編碼
+#### 使用One-hot encoding 編碼
 
 ```python
 # 文字類別轉換成0與1編成的個碼
