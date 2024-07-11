@@ -29,9 +29,26 @@ df = pd.read_csv('/content/HousePrices.csv',index_col=0)
 df.head()
 ```
 ![image](https://github.com/hsu-chien-chung/DataScienceProject/assets/118785456/b94ad0c6-8f14-4cd1-b116-e45764e8b557)
+### 資料正規畫 ###
+資料本身的數據數值沒有統一，所以選擇將資料作正規化。
 
+使用了最小最大標準化來將除了yes/no以外的資料來正規化，yes/no我選擇用Label encoding來數值化，這樣全部的數值只會介於0~1之間。
+```python
+#將資料做標準化
+from sklearn import preprocessing
+#將價格－樓層數、車庫數(price－stories、garage)用最小最大標準化
+minmax = preprocessing.MinMaxScaler()
+df.iloc[:,:5]= minmax.fit_transform(df.iloc[:,:5])
+df.iloc[:,:5]=df.iloc[:,:5].round(3)
+df.iloc[:,[-2]]= minmax.fit_transform(df.iloc[:,[-2]])
+df.iloc[:,-2]=df.iloc[:,-2].round(3)
+#將其他資料分(0,1)
 
+df.replace('yes', 1,inplace=True)
+df.replace('no', 0,inplace=True)
 
+df
+```
 
 
 
