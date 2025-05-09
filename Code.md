@@ -143,9 +143,10 @@ df_pc.style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}")
 pca = PCA(3)
 pca.fit(X)
 np.round(pca.explained_variance_ratio_, 2)
-print(pca.explained_variance_,"\n") #解釋變量
+print(pca.explained_variance_,"\n") #解釋變量(數值越大其成分越重要)
 print(pca.explained_variance_ratio_) #3維的解釋變量的比例
 ```
+![image](https://github.com/user-attachments/assets/ad47bf58-bf09-4283-8921-6fe8d7e91d14)
 
 由於前三項解釋能力只有60%多，所以我想看所有的主成分解釋力。
 
@@ -154,6 +155,7 @@ pca_10d = PCA(11)
 pca_10d.fit(X)
 np.round(pca_10d.explained_variance_ratio_, 2)
 ```
+![image](https://github.com/user-attachments/assets/d140ced0-c98b-45bb-b077-058b2d3936cc)
 
 從上得知主成分分析的結果是不佳的，畢竟如果選擇前三項主成分來分析，會有接近40%的變數解釋力損失，取到90%以上，就喪失了用主成分降維的意義。  
 (備註：變數轉換公式:原始資料*(pca解釋變量(X))，就會有新的變數。)
@@ -176,14 +178,16 @@ silhouette_scores = [silhouette_score(X, model.labels_) for model in kmeans_list
 #### 選擇最佳的分群數，
 
 ```python
-# 方法一:
+# 方法一(手肘法):
 sns.lineplot(x=range(1,12),y=inertias)  #線轉為平緩的點代表最適的分群，可是此圖的點落在分11群。
 ```
+![image](https://github.com/user-attachments/assets/26008b66-7319-485c-b0b2-f54f05d3d5de)
 
 ```python
-# 方法二:
+# 方法二(輪廓分析法):
 sns.lineplot(x=range(2,12),y=silhouette_scores) #分數越高的點表示最適的分群，而此圖也落在分9或11群
 ```
+![image](https://github.com/user-attachments/assets/1643aca8-097a-4e40-843f-2879314eefa0)
 
 由於上方數據得知這組資料不適合k-means來分群。  
 
@@ -198,21 +202,24 @@ Kmeans.fit(X)
 
 df1 = df.copy()    #複製一個新的data
 
-df1['Kmeans']=Kmeans.labels_  #將分好的值都入d值都入df1
+df1['Kmeans']=Kmeans.labels_  #將分好群的值加入df1
 df1
 ```
+![image](https://github.com/user-attachments/assets/6f8b94ed-41d9-45b2-aee9-d20a5baba615)
 
 使用相關性矩陣圖來判斷變數與分群的相關性。
 
 ```python
 sns.heatmap(df1.corr()) #從中能發現有一個變數(地下室)是強相關
 ```
+![image](https://github.com/user-attachments/assets/da8d3e0e-9462-4f9e-9f1b-aeea51d18352)
 
 ```python
 df1.corr().style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}") 
 
-#相關性矩陣的地下室數值與Kmeans分類是完全一樣的，能判斷他是用有無地下室來分類。
+#相關性矩陣的地下室數值與Kmeans分類是完全一樣的，能判斷它是用有無地下室來分類。
 ```
+![image](https://github.com/user-attachments/assets/722865df-9807-4def-93b8-20f65e7c48af)
 
 從之前的PCA和KMean得知這筆資料可能不適合用來分群，接下來我打算用神經網路(NN)來訓練並預測。
 
@@ -251,13 +258,14 @@ def PLT(history):
   plt.show()
 ```
 
-將價格強制分成3類，分別為前25%,中段的50%和後段的25%。
+將價格強制分成3類，分別為前25%,中間50%和後25%。
 
 ```python
 sns.set(rc={'figure.figsize':(10,5)})
 sns.boxplot(data=df,x='price')
 print(df.iloc[:,0].describe())
 ```
+![image](https://github.com/user-attachments/assets/340407d1-99c5-40bf-947f-9628990e76b9)
 
 ```python
 df.iloc[df.iloc[:,0]>0.345,0]=3
@@ -267,6 +275,8 @@ df.iloc[df.iloc[:,0]<1,0]=2
 df.iloc[:,0]=df.iloc[:,0].astype('str')  #我先將資料類型轉成文字以方便之後的機器人計算
 df.price.value_counts()   #能看到資料已經分類好了
 ```
+![image](https://github.com/user-attachments/assets/435ae7b6-7667-490d-8579-0cdfab2a9d63)
+
 
 資料分割:60%訓練集、20%測試集、20%驗證集。
 
@@ -289,13 +299,14 @@ test_y = test_df[:,0]
 print(train_y.shape)  
 print(test_y.shape)
 ```
+![image](https://github.com/user-attachments/assets/324bec9f-cb15-42c2-8978-0413a94aca9e)
 
 #### 使用One-hot encoding 編碼
 
 ```python
 # 文字類別轉換成0與1編成的個碼
 # 0ne-hot encoding
-train_y = pd.get_dummies(train_y).to_numpy()  #將dataframe轉換成array,以方便機器人運算
+train_y = pd.get_dummies(train_y).to_numpy()  #將dataframe轉換成array,以方便分類運算
 test_y = pd.get_dummies(test_y).to_numpy()
 ```
 
@@ -311,6 +322,7 @@ adam = Adam(lr=0.001)      #使用Adam梯度下降，學習率為0.001
 model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])  #損失函數是分類交叉商
 model.summary()
 ```
+![image](https://github.com/user-attachments/assets/1b33ebe1-1d27-48a0-8909-d813b1c4e539)
 
 #### 訓練模型
 
@@ -325,10 +337,12 @@ history = model.fit(train_X, train_y, validation_split=0.25, batch_size=4, epoch
 ```python
 PLT(history) #圖片結果顯示橘線的最後的準確率有向下的趨勢，損失值的中後段有向上趨勢，代表還是有過度擬合的發生。
 ```
+![image](https://github.com/user-attachments/assets/198e5b13-823f-45c6-8e3a-5969b3c5abbe)
 
 模型的測試分數。
 
 ```python
 test_loss, test_acc = model.evaluate(test_X, test_y)
-print('\nTest accuracy:', test_acc)  #準確率來到72.73%，還可以
+print('\nTest accuracy:', test_acc)  #準確率為72.73%
 ```
+![image](https://github.com/user-attachments/assets/9d3dc409-9c90-46a4-be77-48ce446bf02d)
