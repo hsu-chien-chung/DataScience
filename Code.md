@@ -106,12 +106,14 @@ else:
 Upper=(df.iloc[:,0].quantile(0.75)+1.5*IQR).round(2) #四分位距上邊界計算
 print('\nIQR=',IQR,'下邊界=',Lower,'上邊界=',Upper)
 ```
+![image](https://github.com/user-attachments/assets/4406d479-d3a7-40b1-b6f4-2bd28fcd3682)
 
 ```python
 sns.histplot(data=df,x='price')
+
 #購買房屋價格如同人民薪資所得一樣是右偏斜。
 ```
-
+![image](https://github.com/user-attachments/assets/060f0a1d-2c63-478e-aef0-ab8fd87de4db)
 ### 主成分分析
 
 變數量多，所以用資料降維來方便分析。
