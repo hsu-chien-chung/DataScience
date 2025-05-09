@@ -67,9 +67,10 @@ sns.set(rc={'figure.figsize':(10,8)})
 
 sns.pairplot(df,kind="reg",plot_kws={'line_kws':{'color':'r'},'scatter_kws':{'color':'b'}},diag_kws=dict(color='g'),corner=True)
 plt.show()
+```
 ![image](https://github.com/user-attachments/assets/8555194d-cc4f-4285-a4d8-3c3ee19449a3)
 #由於正規化後，很多數值都是0或1比較難看出趨勢。
-```
+
 
 
 #### 相關性矩陣與矩陣圖
