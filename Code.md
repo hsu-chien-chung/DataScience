@@ -69,7 +69,7 @@ sns.pairplot(df,kind="reg",plot_kws={'line_kws':{'color':'r'},'scatter_kws':{'co
 plt.show()
 ```
 ![image](https://github.com/user-attachments/assets/8555194d-cc4f-4285-a4d8-3c3ee19449a3)
-# 由於正規化後，很多數值都是0或1比較難看出趨勢。
+由於正規化後，很多數值都是0或1比較難看出趨勢。
 
 
 
