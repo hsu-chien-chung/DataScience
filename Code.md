@@ -69,7 +69,7 @@ sns.pairplot(df,kind="reg",plot_kws={'line_kws':{'color':'r'},'scatter_kws':{'co
 plt.show()
 ```
 ![image](https://github.com/user-attachments/assets/8555194d-cc4f-4285-a4d8-3c3ee19449a3)
-#由於正規化後，很多數值都是0或1比較難看出趨勢。
+# 由於正規化後，很多數值都是0或1比較難看出趨勢。
 
 
 
@@ -79,14 +79,18 @@ plt.show()
 df.corr().style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}")
 #相關性矩陣，從表可得知所有變數的相關性都落在中度相關與弱相關，裡面的數值沒有0.7以上的強相關。
 ```
+![image](https://github.com/user-attachments/assets/65a4510b-bfb8-4ff6-90c3-862090da4ac5)
 
 ```python
+
 sns.set(rc={'figure.figsize':(10,8)})
 sns.heatmap(df.corr())
 #做相關性矩陣圖，從圖可以看到顏色越淺表示相關性越強。
 ```
+![image](https://github.com/user-attachments/assets/977f6a96-b68e-490b-9d74-63be40eb65aa)
 
-從相關性矩陣圖可得知，目標與變數之間沒有較強的相關性。  
+
+# 從相關性矩陣圖可得知，目標與變數之間沒有較強的相關性。  
 
 #### 基礎的資料與箱型圖
 
