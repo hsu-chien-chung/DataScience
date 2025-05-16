@@ -175,7 +175,7 @@ inertias = [model.inertia_ for model in kmeans_list]
 silhouette_scores = [silhouette_score(X, model.labels_) for model in kmeans_list[1:]]
 ```
 
-#### 選擇最佳的分群數，
+#### 選擇最佳的分群數
 
 ```python
 # 方法一(手肘法):
