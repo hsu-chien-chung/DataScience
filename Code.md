@@ -221,7 +221,7 @@ df1.corr().style.background_gradient(cmap='bwr_r', axis=None).format("{:.2}")
 ```
 ![image](https://github.com/user-attachments/assets/722865df-9807-4def-93b8-20f65e7c48af)
 
-從之前的PCA和KMean得知這筆資料可能不適合用來分群，接下來我打算用神經網路(NN)來訓練並預測。
+從之前的PCA和KMean得知這筆資料可能不適合用來降維和分群，接下來我打算用神經網路(NN)來訓練並預測。
 
 ### 神經網路(NN)
 
